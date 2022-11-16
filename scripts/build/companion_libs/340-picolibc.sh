@@ -23,12 +23,14 @@ do_picolibc_extract() {
 }
 
 #------------------------------------------------------------------------------
-# Build an additional target libstdc++ with "-Os" (optimise for speed) option
+# Build an additional target libstdc++ with "-Os" (optimise for size) option
 # flag for libstdc++ "picolibc" variant.
 do_cc_libstdcxx_picolibc()
 {
     local -a final_opts
     local final_backend
+    local cflags_for_target
+    local save_cflags
 
     if [ "${CT_LIBC_PICOLIBC_GCC_LIBSTDCXX}" = "y" ]; then
         final_opts+=( "host=${CT_HOST}" )
@@ -41,6 +43,7 @@ do_cc_libstdcxx_picolibc()
         final_opts+=( "build_step=libstdcxx" )
         final_opts+=( "extra_config+=('--enable-stdio=stdio_pure')" )
         final_opts+=( "extra_config+=('--disable-wchar_t')" )
+        cflags_for_target="${CT_ALL_TARGET_CFLAGS} ${CT_LIBC_PICOLIBC_TARGET_CFLAGS} -isystem ${CT_PREFIX_DIR}/picolibc/include"
         if [ "${CT_LIBC_PICOLIBC_ENABLE_TARGET_OPTSPACE}" = "y" ]; then
             final_opts+=( "enable_optspace=yes" )
         fi
@@ -60,7 +63,10 @@ do_cc_libstdcxx_picolibc()
 
         CT_DoStep INFO "Installing libstdc++ picolibc"
         CT_mkdir_pushd "${CT_BUILD_DIR}/build-cc-libstdcxx-picolibc"
+        save_cflags=${CT_TARGET_CFLAGS}
+        CT_TARGET_CFLAGS=${cflags_for_target}
         "${final_backend}" "${final_opts[@]}"
+        CT_TARGET_CFLAGS=${save_cflags}
         CT_Popd
 
         CT_EndStep
