@@ -351,6 +351,15 @@ if [ -z "${CT_RESTART}" ]; then
         # confused when $sysroot/usr/include is not present.
         # Note: --prefix=/usr is magic!
         # See http://www.gnu.org/software/libc/FAQ.html#s-2.2
+    elif [ "${CT_BARE_METAL}" = "y" ]; then
+        # Always using --with-sysroot on bare metal toolchains
+        CT_SYSROOT_DIR="${CT_PREFIX_DIR}/${CT_TARGET}"
+        CT_DEBUGROOT_DIR="${CT_SYSROOT_DIR}"
+        CT_HEADERS_DIR="${CT_SYSROOT_DIR}/include"
+        CT_SanitizeVarDir CT_SYSROOT_DIR CT_DEBUGROOT_DIR CT_HEADERS_DIR
+        CT_BINUTILS_SYSROOT_ARG="--with-sysroot=${CT_SYSROOT_DIR}"
+        CT_CC_CORE_SYSROOT_ARG=("--with-sysroot=${CT_SYSROOT_DIR}")
+        CT_CC_SYSROOT_ARG=("--with-sysroot=${CT_SYSROOT_DIR}")
     else
         # plain old way. All libraries in prefix/target/lib
         CT_SYSROOT_DIR="${CT_PREFIX_DIR}/${CT_TARGET}"
