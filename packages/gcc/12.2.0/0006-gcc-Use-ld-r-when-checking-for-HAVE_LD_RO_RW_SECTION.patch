@@ -1,0 +1,58 @@
+From 11beb80a2dcb2d46af65a85997fc6aaae91ccfa4 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Joakim=20Nohlg=C3=A5rd?= <joakim@nohlgard.se>
+Date: Mon, 28 Nov 2022 13:46:02 +0100
+Subject: [PATCH] gcc: Use ld -r when checking for HAVE_LD_RO_RW_SECTION_MIXING
+
+The check for HAVE_LD_RO_RW_SECTION_MIXING fails on targets where ld
+does not support shared objects, even though the answer to the test
+should be 'read-write'. One such target is riscv64-unknown-elf. Failing
+this test results in a libgcc crtbegin.o which has a writable .eh_frame
+section leading to the default linker scripts placing the .eh_frame
+section in a writable memory segment, or a linker warning about writable
+sections in a read-only segment when using ld scripts that place
+.eh_frame unconditionally in ROM.
+
+gcc/ChangeLog:
+
+	* configure: Regenerate.
+	* configure.ac: Use ld -r in the check for HAVE_LD_RO_RW_SECTION_MIXING
+---
+ gcc/configure    | 4 ++--
+ gcc/configure.ac | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/gcc/configure b/gcc/configure
+index aa0960991c9..501a947d180 100755
+--- a/gcc/configure
++++ b/gcc/configure
+@@ -24277,9 +24277,9 @@ elif test x$gcc_cv_as != x -a x$gcc_cv_ld != x -a x$gcc_cv_objdump != x ; then
+   if $gcc_cv_as -o conftest1.o conftest1.s > /dev/null 2>&1 \
+      && $gcc_cv_as -o conftest2.o conftest2.s > /dev/null 2>&1 \
+      && $gcc_cv_as -o conftest3.o conftest3.s > /dev/null 2>&1 \
+-     && $gcc_cv_ld -shared -o conftest1.so conftest1.o \
++     && $gcc_cv_ld -r -o conftest.o conftest1.o \
+ 	conftest2.o conftest3.o > /dev/null 2>&1; then
+-    gcc_cv_ld_ro_rw_mix=`$gcc_cv_objdump -h conftest1.so \
++    gcc_cv_ld_ro_rw_mix=`$gcc_cv_objdump -h conftest.o \
+ 			 | sed -e '/myfoosect/!d' -e N`
+     if echo "$gcc_cv_ld_ro_rw_mix" | grep CONTENTS > /dev/null; then
+       if echo "$gcc_cv_ld_ro_rw_mix" | grep READONLY > /dev/null; then
+diff --git a/gcc/configure.ac b/gcc/configure.ac
+index 7c55bff6cb0..4f36ed4aff3 100644
+--- a/gcc/configure.ac
++++ b/gcc/configure.ac
+@@ -3153,9 +3153,9 @@ elif test x$gcc_cv_as != x -a x$gcc_cv_ld != x -a x$gcc_cv_objdump != x ; then
+   if $gcc_cv_as -o conftest1.o conftest1.s > /dev/null 2>&1 \
+      && $gcc_cv_as -o conftest2.o conftest2.s > /dev/null 2>&1 \
+      && $gcc_cv_as -o conftest3.o conftest3.s > /dev/null 2>&1 \
+-     && $gcc_cv_ld -shared -o conftest1.so conftest1.o \
++     && $gcc_cv_ld -r -o conftest.o conftest1.o \
+ 	conftest2.o conftest3.o > /dev/null 2>&1; then
+-    gcc_cv_ld_ro_rw_mix=`$gcc_cv_objdump -h conftest1.so \
++    gcc_cv_ld_ro_rw_mix=`$gcc_cv_objdump -h conftest.o \
+ 			 | sed -e '/myfoosect/!d' -e N`
+     if echo "$gcc_cv_ld_ro_rw_mix" | grep CONTENTS > /dev/null; then
+       if echo "$gcc_cv_ld_ro_rw_mix" | grep READONLY > /dev/null; then
+-- 
+2.38.1
+
