@@ -10,6 +10,36 @@
 ## help conglomeration of several library parts, all under BSD-compatible software
 ## help licenses that make them easily usable on embedded products.
 
+choice LIBC_PICOLIBC_INSTALL_TYPE
+    bool
+    prompt "Installation type"
+    default LIBC_PICOLIBC_INSTALL_TYPE_SYSTEM if LIBC_PICOLIBC
+    default LIBC_PICOLIBC_INSTALL_TYPE_COMPLIB if !LIBC_PICOLIBC
+
+config LIBC_PICOLIBC_INSTALL_TYPE_COMPLIB
+    bool
+    prompt "Companion library"
+    depends on !LIBC_PICOLIBC
+    help
+      Picolibc will be installed in a separate directory under the
+      toolchain prefix: ${CT_PREFIX_DIR}/picolibc
+
+      Using picolibc instead of the default libc with the built toolchain
+      will require an extra compilation flag '-specs=picolibc.specs' passed
+      to gcc/g++
+
+config LIBC_PICOLIBC_INSTALL_TYPE_SYSTEM
+    bool
+    prompt "System libc"
+    depends on LIBC_PICOLIBC
+    help
+      Picolibc will be installed in as the default libc for the toolchain
+
+      No extra compilation flags will be required to use picolibc as the
+      target C-library
+
+endchoice # LIBC_PICOLIBC_INSTALL_TYPE
+
 config LIBC_PICOLIBC_GCC_LIBSTDCXX
     bool
     prompt "Compile libstdc++ picolibc variant"
