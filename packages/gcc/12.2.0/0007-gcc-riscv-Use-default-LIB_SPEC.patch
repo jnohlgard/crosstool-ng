@@ -1,0 +1,40 @@
+From ec8071335074790aa92efde592cf681a354761fd Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Joakim=20Nohlg=C3=A5rd?= <joakim@nohlgard.se>
+Date: Mon, 5 Dec 2022 17:12:34 +0100
+Subject: [PATCH] gcc/riscv: Use default LIB_SPEC
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Rely on default LIB_SPEC in gcc.cc. Do not force -lgloss into the link
+command, makes it easier to use alternative BSP libraries for bare metal
+projects.
+
+gcc/ChangeLog:
+
+	* config/riscv/elf.h (LIB_SPEC): Remove definition
+
+Signed-off-by: Joakim Nohlgård <joakim@nohlgard.se>
+---
+ gcc/config/riscv/elf.h | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/gcc/config/riscv/elf.h b/gcc/config/riscv/elf.h
+index f0e865d6ef4..a2d6580918c 100644
+--- a/gcc/config/riscv/elf.h
++++ b/gcc/config/riscv/elf.h
+@@ -24,11 +24,6 @@ along with GCC; see the file COPYING3.  If not see
+ %{mlittle-endian:-EL} \
+ %{shared}"
+ 
+-/* Link against Newlib libraries, because the ELF backend assumes Newlib.
+-   Handle the circular dependence between libc and libgloss. */
+-#undef  LIB_SPEC
+-#define LIB_SPEC "--start-group -lc %{!specs=nosys.specs:-lgloss} --end-group"
+-
+ #undef  STARTFILE_SPEC
+ #define STARTFILE_SPEC "crt0%O%s crtbegin%O%s"
+ 
+-- 
+2.38.1
+
