@@ -1,0 +1,52 @@
+From 29bcd1df98d185053d2c4a3a7d247abea526501f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Joakim=20Nohlg=C3=A5rd?= <joakim@nohlgard.se>
+Date: Tue, 6 Dec 2022 10:14:54 +0100
+Subject: [PATCH 2/2] Provide an empty libg
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The default configuration in GCC on many platforms adds -lg to the
+linker command line if the compilation is using debug (-g).
+glibc has provided an empty libg.a since at least 1995, newlib provides a
+libg.a hardlinked to libc.a, and so on.
+Having this empty library avoids linker errors when using a custom
+toolchain with picolibc as the default libc and not using picolibc.specs
+
+Signed-off-by: Joakim Nohlgård <joakim@nohlgard.se>
+---
+ newlib/meson.build | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/newlib/meson.build b/newlib/meson.build
+index e9f63474d..8df5d11a0 100644
+--- a/newlib/meson.build
++++ b/newlib/meson.build
+@@ -59,9 +59,11 @@ foreach target : targets
+ 
+   if target == ''
+     libc_name = 'c'
++    libg_name = 'g'
+     libm_name = 'm'
+   else
+     libc_name = join_paths(target, 'libc')
++    libg_name = join_paths(target, 'libg')
+     libm_name = join_paths(target, 'libm')
+   endif
+ 
+@@ -81,6 +83,12 @@ foreach target : targets
+ 		 install_dir : instdir,
+ 		 pic: false,
+ 		 objects : [])
++  static_library(libg_name,
++		 ['empty.c'],
++		 install : true,
++		 install_dir : instdir,
++		 pic: false,
++		 objects : [])
+ 
+   if check_duplicate_names
+     custom_target('libc_duplicates' + target,
+-- 
+2.38.1
+

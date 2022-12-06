@@ -1,0 +1,57 @@
+From d170af63b101a044aaf9e104860de80687c28b21 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Joakim=20Nohlg=C3=A5rd?= <joakim@nohlgard.se>
+Date: Tue, 6 Dec 2022 08:12:02 +0100
+Subject: [PATCH 1/2] meson: Remove unused variable lib_m{target}
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Leftovers after 55bc0abd6c2b89d697ca160b88f46d5951e9fba3 "Merge core C
+library with math library"
+
+Signed-off-by: Joakim Nohlgård <joakim@nohlgard.se>
+---
+ meson.build        |  2 +-
+ newlib/meson.build | 15 ++++++---------
+ 2 files changed, 7 insertions(+), 10 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index b0220289a..4d73c67ac 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1321,5 +1321,5 @@ configure_file(output : 'picolibc.h',
+ # provide a dependency to be used by the main project:
+ #   dependency('libc', fallback: ['picolibc', 'libc_dep'])
+ if not enable_multilib and meson.is_subproject()
+-  picolibc_dep = declare_dependency(include_directories: inc, link_with: [lib_c, lib_m])
++  picolibc_dep = declare_dependency(include_directories: inc, link_with: [lib_c])
+ endif
+diff --git a/newlib/meson.build b/newlib/meson.build
+index c09ae558d..e9f63474d 100644
+--- a/newlib/meson.build
++++ b/newlib/meson.build
+@@ -75,15 +75,12 @@ foreach target : targets
+ 				      c_args: value[1])
+ 
+   set_variable('lib_c' + target, local_lib_c_target)
+-
+-  local_lib_m_target = static_library(libm_name,
+-                                      ['empty.c'],
+-                                      install : true,
+-                                      install_dir : instdir,
+-                                      pic: false,
+-                                      objects : [])
+-
+-  set_variable('lib_m' + target, local_lib_m_target)
++  static_library(libm_name,
++		 ['empty.c'],
++		 install : true,
++		 install_dir : instdir,
++		 pic: false,
++		 objects : [])
+ 
+   if check_duplicate_names
+     custom_target('libc_duplicates' + target,
+-- 
+2.38.1
+
