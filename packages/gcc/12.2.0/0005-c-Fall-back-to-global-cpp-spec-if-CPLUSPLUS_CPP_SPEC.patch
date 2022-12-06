@@ -1,0 +1,47 @@
+From 072c82d31241ae21705e80747eb6c51dfea3785f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Joakim=20Nohlg=C3=A5rd?= <joakim@nohlgard.se>
+Date: Wed, 23 Nov 2022 00:25:32 +0100
+Subject: [PATCH] c++: Fall back to global cpp spec if CPLUSPLUS_CPP_SPEC is
+ not defined
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+When CPLUSPLUS_CPP_SPEC is set to a string literal it is not possible to
+modify it through external spec files by renaming the original cpp spec
+and replacing it because the compiler cpp_spec will still point to the
+original, renamed cpp spec. Not defining CPLUSPLUS_CPP_SPEC makes gcc.cc
+fall back to using the same cpp spec as the C compiler when substituting
+%C in spec strings.
+
+gcc/ChangeLog:
+
+	* defaults.h (CPLUSPLUS_CPP_SPEC): Remove default definition.
+
+Signed-off-by: Joakim Nohlgård <joakim@nohlgard.se>
+---
+ gcc/defaults.h | 8 --------
+ 1 file changed, 8 deletions(-)
+
+diff --git a/gcc/defaults.h b/gcc/defaults.h
+index 376687d91b1..223460ef239 100644
+--- a/gcc/defaults.h
++++ b/gcc/defaults.h
+@@ -783,14 +783,6 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
+ #endif
+ #endif
+ 
+-/* By default, the preprocessor should be invoked the same way in C++
+-   as in C.  */
+-#ifndef CPLUSPLUS_CPP_SPEC
+-#ifdef CPP_SPEC
+-#define CPLUSPLUS_CPP_SPEC CPP_SPEC
+-#endif
+-#endif
+-
+ #ifndef ACCUMULATE_OUTGOING_ARGS
+ #define ACCUMULATE_OUTGOING_ARGS 0
+ #endif
+-- 
+2.38.1
+
